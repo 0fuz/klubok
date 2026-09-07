@@ -211,9 +211,12 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) onRe
 applyTheme();
 startLevel(levelNo);
 
-// ?debug: on-screen readout of sizes and input state, for reports from real devices.
-if (query.has('debug')) {
+// Debug readout of sizes and input state, for reports from real devices.
+// Enabled with ?debug or by tapping the level number five times.
+let debugTimer = 0;
+function toggleDebug() {
   const el = document.getElementById('debug');
+  if (!el.hidden) { el.hidden = true; clearInterval(debugTimer); debugTimer = 0; return; }
   el.hidden = false;
   const tick = () => {
     const r = canvas.getBoundingClientRect();
@@ -224,11 +227,21 @@ if (query.has('debug')) {
       `canvas css ${r.left.toFixed(0)},${r.top.toFixed(0)} ${r.width.toFixed(0)}x${r.height.toFixed(0)} buf ${canvas.width}x${canvas.height}`,
       `renderer ${renderer.W.toFixed(0)}x${renderer.H.toFixed(0)} cam ${renderer.cam.scale.toFixed(1)} ${renderer.cam.cx.toFixed(1)},${renderer.cam.cy.toFixed(1)} fit ${game ? renderer.fitScale().toFixed(1) : '-'}`,
       `pointers ${input.pointers.size} drag ${input.dragging} gesture ${input.gesture} moving ${game ? game.moving.size : 0}`,
-      `level ${levelNo} ${level ? level.w + 'x' + level.h : ''} standalone ${matchMedia('(display-mode: standalone)').matches}`,
+      `level ${levelNo} ${level ? level.w + 'x' + level.h : ''} standalone ${matchMedia('(display-mode: standalone)').matches} ua ${navigator.userAgent.slice(0, 60)}`,
     ].join('\n');
   };
-  setInterval(tick, 250);
+  debugTimer = setInterval(tick, 250);
   tick();
+}
+if (query.has('debug')) toggleDebug();
+{
+  let taps = 0, last = 0;
+  document.querySelector('.stat').addEventListener('click', () => {
+    const now = performance.now();
+    taps = now - last < 600 ? taps + 1 : 1;
+    last = now;
+    if (taps >= 5) { taps = 0; toggleDebug(); }
+  });
 }
 
 // Dev hooks (?dev): drive the game from the console or from automation.
