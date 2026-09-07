@@ -23,6 +23,17 @@ export class Input {
     canvas.addEventListener('wheel', (e) => this.wheel(e), { passive: false });
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     canvas.addEventListener('dblclick', (e) => e.preventDefault());
+    // A finger whose release never reached us would block every later tap: forget
+    // everything when the page loses focus or is hidden.
+    window.addEventListener('blur', () => this.reset());
+    document.addEventListener('visibilitychange', () => { if (document.hidden) this.reset(); });
+  }
+
+  reset() {
+    this.pointers.clear();
+    this.pinch = null;
+    this.dragging = false;
+    this.endGesture();
   }
 
   pos(e) {
@@ -42,7 +53,11 @@ export class Input {
     try { this.canvas.setPointerCapture?.(e.pointerId); } catch {}
     const [x, y] = this.pos(e);
     const touch = e.pointerType !== 'mouse';
-    this.pointers.set(e.pointerId, { x, y, sx: x, sy: y, t: performance.now(), touch });
+    const now = performance.now();
+    // stale pointers (no events for 4 s) are leftovers of a lost release
+    for (const [id, q] of this.pointers) if (now - q.last > 4000) this.pointers.delete(id);
+    if (this.pointers.size === 0) { this.dragging = false; this.pinch = null; }
+    this.pointers.set(e.pointerId, { x, y, sx: x, sy: y, t: now, last: now, touch });
     if (this.pointers.size === 2) {
       const [a, b] = [...this.pointers.values()];
       this.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
@@ -57,6 +72,7 @@ export class Input {
     const [x, y] = this.pos(e);
     const px = p.x, py = p.y;
     p.x = x; p.y = y;
+    p.last = performance.now();
     if (this.pointers.size >= 2 && this.pinch) {
       const [a, b] = [...this.pointers.values()];
       const d = Math.hypot(a.x - b.x, a.y - b.y);

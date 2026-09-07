@@ -310,6 +310,11 @@ export class Renderer {
     const settled = nowMs - this.lastCamChange > 90;
     if (this.layerCam === null || (this.dirty && !this.gesture && settled)) this.renderLayer();
 
+    if (this.layer.width !== this.canvas.width || this.layer.height !== this.canvas.height) {
+      this.layer.width = this.canvas.width;
+      this.layer.height = this.canvas.height;
+      this.renderLayer();
+    }
     const ctx = this.ctx, A = this.layerCam, B = this.cam;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     if (A.scale === B.scale && A.cx === B.cx && A.cy === B.cy) {

@@ -203,6 +203,26 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) onRe
 applyTheme();
 startLevel(levelNo);
 
+// ?debug: on-screen readout of sizes and input state, for reports from real devices.
+if (query.has('debug')) {
+  const el = document.getElementById('debug');
+  el.hidden = false;
+  const tick = () => {
+    const r = canvas.getBoundingClientRect();
+    const vv = window.visualViewport;
+    el.textContent = [
+      `win ${innerWidth}x${innerHeight} dpr ${devicePixelRatio.toFixed(2)} ${document.documentElement.dataset.theme}`,
+      vv ? `vv ${vv.width.toFixed(0)}x${vv.height.toFixed(0)} scale ${vv.scale.toFixed(2)} off ${vv.offsetLeft.toFixed(0)},${vv.offsetTop.toFixed(0)}` : 'no visualViewport',
+      `canvas css ${r.left.toFixed(0)},${r.top.toFixed(0)} ${r.width.toFixed(0)}x${r.height.toFixed(0)} buf ${canvas.width}x${canvas.height}`,
+      `renderer ${renderer.W.toFixed(0)}x${renderer.H.toFixed(0)} cam ${renderer.cam.scale.toFixed(1)} ${renderer.cam.cx.toFixed(1)},${renderer.cam.cy.toFixed(1)} fit ${game ? renderer.fitScale().toFixed(1) : '-'}`,
+      `pointers ${input.pointers.size} drag ${input.dragging} gesture ${input.gesture} moving ${game ? game.moving.size : 0}`,
+      `level ${levelNo} ${level ? level.w + 'x' + level.h : ''} standalone ${matchMedia('(display-mode: standalone)').matches}`,
+    ].join('\n');
+  };
+  setInterval(tick, 250);
+  tick();
+}
+
 // Dev hooks (?dev): drive the game from the console or from automation.
 if (query.has('dev')) {
   window.__klubok = {
