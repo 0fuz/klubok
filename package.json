@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Snake untangle puzzle: tap snakes to let them slither out of the board",
+  "description": "Klubok: a puzzle about tangled snakes. Tap a snake and it slithers off the board.",
   "scripts": {
     "test": "node --test tests/*.test.js",
     "bench": "node tools/bench.js",
