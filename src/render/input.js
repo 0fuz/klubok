@@ -1,7 +1,9 @@
 // Pointer, wheel and keyboard input: taps, drag-pan, pinch zoom, wheel zoom.
 
-const TAP_MOVE = 9;
-const TAP_MS = 400;
+// Fingers wobble: a touch may travel ~15-20 css px during a plain tap, a mouse barely moves.
+const TAP_MOVE_TOUCH = 22;
+const TAP_MOVE_MOUSE = 6;
+const TAP_MS = 650;
 const DOUBLE_MS = 320;
 
 export class Input {
@@ -37,9 +39,10 @@ export class Input {
 
   down(e) {
     if (e.button !== undefined && e.button > 1) return;
-    this.canvas.setPointerCapture?.(e.pointerId);
+    try { this.canvas.setPointerCapture?.(e.pointerId); } catch {}
     const [x, y] = this.pos(e);
-    this.pointers.set(e.pointerId, { x, y, sx: x, sy: y, t: performance.now() });
+    const touch = e.pointerType !== 'mouse';
+    this.pointers.set(e.pointerId, { x, y, sx: x, sy: y, t: performance.now(), touch });
     if (this.pointers.size === 2) {
       const [a, b] = [...this.pointers.values()];
       this.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
@@ -64,9 +67,14 @@ export class Input {
       return;
     }
     if (this.pointers.size === 1) {
-      if (!this.dragging && Math.hypot(x - p.sx, y - p.sy) > TAP_MOVE) {
+      const limit = p.touch ? TAP_MOVE_TOUCH : TAP_MOVE_MOUSE;
+      if (!this.dragging && Math.hypot(x - p.sx, y - p.sy) > limit) {
+        // only start dragging when there is something to drag; otherwise stay a tap
+        if (!this.h.canPan()) return;
         this.dragging = true;
         this.startGesture();
+        this.h.pan(x - p.sx, y - p.sy, false);
+        return;
       }
       if (this.dragging) this.h.pan(x - px, y - py, false);
     }
@@ -78,7 +86,8 @@ export class Input {
     this.pointers.delete(e.pointerId);
     const now = performance.now();
     if (!cancelled && this.pointers.size === 0 && !this.dragging && now - p.t < TAP_MS) {
-      const [x, y] = this.pos(e);
+      // use the touch-down point: it is where the finger aimed, before any wobble
+      const x = p.sx, y = p.sy;
       const consumed = this.h.tap(x, y);
       if (!consumed && this.lastTap && now - this.lastTap.t < DOUBLE_MS && Math.hypot(x - this.lastTap.x, y - this.lastTap.y) < 30) {
         this.h.doubleTap(x, y);

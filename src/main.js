@@ -101,8 +101,21 @@ const input = new Input(canvas, {
   tap(sx, sy) {
     if (!game || game.over || finishing) return false;
     const [wx, wy] = renderer.screenToWorld(sx, sy);
-    const i = game.snakeAt(Math.floor(wx), Math.floor(wy));
-    if (i < 0) return false;
+    let i = game.snakeAt(Math.floor(wx), Math.floor(wy));
+    if (i < 0) {
+      // finger landed next to a snake: take the nearest snake cell within 3/4 of a cell
+      let best = 0.75 * 0.75;
+      const cx = Math.floor(wx), cy = Math.floor(wy);
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        if (!dx && !dy) continue;
+        const j = game.snakeAt(cx + dx, cy + dy);
+        if (j < 0) continue;
+        const ddx = cx + dx + 0.5 - wx, ddy = cy + dy + 0.5 - wy;
+        const d2 = ddx * ddx + ddy * ddy;
+        if (d2 < best) { best = d2; i = j; }
+      }
+      if (i < 0) return false;
+    }
     const res = game.tap(i, nowTick());
     if (res.result === 'ok') {
       renderer.startMove(i, game.moving.get(i));
@@ -122,6 +135,9 @@ const input = new Input(canvas, {
     if (renderer.cam.scale > renderer.fitScale() * 2.4) renderer.fit();
     else renderer.zoomAt(sx, sy, 2.2);
     requestFrame();
+  },
+  canPan() {
+    return renderer.isZoomed();
   },
   pan(dx, dy, force) {
     if (force || renderer.isZoomed()) renderer.panBy(dx, dy);
@@ -173,11 +189,16 @@ function onResize() {
   const zoomed = renderer.isZoomed();
   renderer.resize();
   if (zoomed) renderer.camChanged(); else renderer.fit();
+  // draw synchronously: rAF may be paused while the window is being resized or rotated
+  renderer.frame(performance.now(), nowTick());
   requestFrame();
 }
 if (typeof ResizeObserver !== 'undefined') new ResizeObserver(onResize).observe(canvas);
-else window.addEventListener('resize', onResize);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) requestFrame(); });
+window.addEventListener('resize', onResize);
+window.addEventListener('orientationchange', () => setTimeout(onResize, 50));
+window.addEventListener('pageshow', onResize);
+window.visualViewport?.addEventListener('resize', onResize);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) onResize(); });
 
 applyTheme();
 startLevel(levelNo);

@@ -1,5 +1,5 @@
 // Offline cache: precache everything, serve cache-first, refresh in the background.
-const CACHE = 'klubok-v3';
+const CACHE = 'klubok-v4';
 const ASSETS = [
   './',
   './index.html',

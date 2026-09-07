@@ -84,6 +84,11 @@ export class Renderer {
     if (this.canvas.width !== pw || this.canvas.height !== ph) {
       this.canvas.width = pw; this.canvas.height = ph;
       this.layer.width = pw; this.layer.height = ph;
+      // an opaque context is black after a resize: paint the background right away so a
+      // paused animation loop (background tab, orientation change) never shows black bars
+      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+      this.ctx.fillStyle = this.theme.bg;
+      this.ctx.fillRect(0, 0, pw, ph);
     }
     this.layerCam = null;
     this.dirty = true;

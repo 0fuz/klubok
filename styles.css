@@ -35,12 +35,13 @@ html, body {
   -webkit-touch-callout: none;
 }
 #app {
+  position: fixed;
+  inset: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-rows: minmax(0, 1fr);
-  height: 100dvh;
-  width: 100vw;
   overflow: hidden;
+  background: var(--bg);
 }
 #board {
   display: block;
@@ -48,6 +49,7 @@ html, body {
   height: 100%;
   min-width: 0;
   min-height: 0;
+  background: var(--bg);
   touch-action: none;
   cursor: pointer;
   outline: none;
