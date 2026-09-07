@@ -21,7 +21,8 @@ plays with mouse and wheel on desktop, hosted on GitHub Pages.
   that is already leaving is delayed instead of punished.
 - Zoom: pinch, mouse wheel, double tap on an empty spot, or the panel buttons.
   Keys: `+`, `-`, `0` (fit the board), `R` (restart).
-- Levels are endless, progress is saved on the device. Light theme, dark theme, or follow the system.
+- Levels are endless, progress is saved on the device. Tap the level number to jump to any level.
+  Light theme, dark theme, or follow the system.
 
 ### Screenshots
 
@@ -123,7 +124,8 @@ MIT.
   стартует с задержкой, а не наказывается.
 - Масштаб: щипок двумя пальцами, колесо мыши, двойной тап по пустому месту, кнопки на панели.
   Клавиши `+`, `-`, `0` (вписать поле), `R` (заново).
-- Уровни бесконечные, прогресс сохраняется на устройстве. Тема светлая, тёмная или как в системе.
+- Уровни бесконечные, прогресс сохраняется на устройстве. Тап по номеру уровня открывает переход к любому уровню.
+  Тема светлая, тёмная или как в системе.
 
 Скриншоты смотри в английской части выше.
 

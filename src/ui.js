@@ -56,6 +56,27 @@ export class UI {
     this.ovBtn.focus();
   }
 
+  showLevelPicker(current, onPick) {
+    const chips = [1, 10, 25, 50, 100, 200, 400].map((n) => `<button class="chip" data-n="${n}">${n}</button>`).join('');
+    this.showOverlay({
+      title: 'Перейти к уровню',
+      html: `<input id="lvl-input" type="number" inputmode="numeric" min="1" max="9999" value="${current}"><div class="chips">${chips}</div>`,
+      button: 'Перейти',
+      button2: 'Отмена',
+      onClick: () => {
+        const v = parseInt(this.el('lvl-input').value, 10);
+        if (v >= 1) onPick(Math.min(9999, v));
+      },
+    });
+    const input = this.el('lvl-input');
+    input.focus();
+    input.select();
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') this.ovBtn.click(); });
+    this.ovText.querySelectorAll('.chip').forEach((b) => {
+      b.onclick = () => { this.hideOverlay(); onPick(Number(b.dataset.n)); };
+    });
+  }
+
   flashLevel(n) {
     const el = this.el('level-flash');
     if (!el) return;

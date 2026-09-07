@@ -185,6 +185,28 @@ button.icon:focus-visible { outline: 2px solid var(--accent); outline-offset: 2p
   cursor: pointer;
 }
 .card .primary { background: var(--accent); color: #fff; }
+.card input[type="number"] {
+  width: 120px;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--btn-border);
+  background: var(--btn);
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.card .chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.card .chip {
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 10px;
+  background: var(--btn);
+  color: var(--text);
+  border: 1px solid var(--btn-border);
+}
+.stat { cursor: pointer; }
 .card .secondary { background: var(--btn); color: var(--text); border: 1px solid var(--btn-border); }
 
 @media (orientation: portrait) {

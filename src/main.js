@@ -236,13 +236,16 @@ function toggleDebug() {
 if (query.has('debug')) toggleDebug();
 {
   let taps = 0, last = 0;
-  document.querySelector('.stat').addEventListener('click', () => {
+  document.getElementById('hearts').addEventListener('click', () => {
     const now = performance.now();
     taps = now - last < 600 ? taps + 1 : 1;
     last = now;
     if (taps >= 5) { taps = 0; toggleDebug(); }
   });
 }
+document.querySelector('.stat').addEventListener('click', () => {
+  ui.showLevelPicker(levelNo, (n) => startLevel(n));
+});
 
 // Dev hooks (?dev): drive the game from the console or from automation.
 if (query.has('dev')) {
