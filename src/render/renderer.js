@@ -75,6 +75,12 @@ export class Renderer {
     this.dirty = true;
   }
 
+  // True when the element's css size drifted away from what the renderer believes.
+  sizeStale() {
+    const r = this.canvas.getBoundingClientRect();
+    return Math.abs(r.width - this.W) > 0.75 || Math.abs(r.height - this.H) > 0.75 || Math.min(window.devicePixelRatio || 1, 2) !== this.dpr;
+  }
+
   resize() {
     const r = this.canvas.getBoundingClientRect();
     this.W = Math.max(1, r.width);

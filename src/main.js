@@ -68,6 +68,7 @@ function requestFrame() {
 function frame() {
   raf = 0;
   if (!game) return;
+  if (renderer.sizeStale()) { syncSize(); return; }
   const t = nowTick();
   const finished = game.update(t);
   if (finished.length) Sfx.exit();
@@ -100,6 +101,7 @@ function onLose() {
 const input = new Input(canvas, {
   tap(sx, sy) {
     if (!game || game.over || finishing) return false;
+    if (renderer.sizeStale()) syncSize();
     const [wx, wy] = renderer.screenToWorld(sx, sy);
     let i = game.snakeAt(Math.floor(wx), Math.floor(wy));
     if (i < 0) {
@@ -184,8 +186,7 @@ window.addEventListener('keydown', (e) => {
   else if (e.key === 'r' || e.key === 'R' || e.key === 'к' || e.key === 'К') startLevel(levelNo, { intro: false });
 });
 
-function onResize() {
-  if (!game) return;
+function syncSize() {
   const zoomed = renderer.isZoomed();
   renderer.resize();
   if (zoomed) renderer.camChanged(); else renderer.fit();
@@ -193,6 +194,13 @@ function onResize() {
   renderer.frame(performance.now(), nowTick());
   requestFrame();
 }
+function onResize() {
+  if (!game) return;
+  syncSize();
+}
+// Belt and braces: some devices drop resize notifications (address bar, rotation,
+// display-mode changes). Poll cheaply; a real mismatch is fixed within half a second.
+setInterval(() => { if (game && renderer.sizeStale()) syncSize(); }, 500);
 if (typeof ResizeObserver !== 'undefined') new ResizeObserver(onResize).observe(canvas);
 window.addEventListener('resize', onResize);
 window.addEventListener('orientationchange', () => setTimeout(onResize, 50));
